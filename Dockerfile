@@ -23,5 +23,15 @@ RUN composer install --no-dev --optimize-autoloader
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage
 
+# ✅ Point Apache to the public directory (required for Laravel)
+RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
+
+# ✅ Allow .htaccess rules (Laravel needs this for routing)
+RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+
 # Expose port
 EXPOSE 80
+
+# Start Apache
+CMD ["apache2-foreground"]
+
